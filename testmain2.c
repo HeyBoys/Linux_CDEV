@@ -11,8 +11,8 @@ int main()
 	fd=open("/dev/test0",O_RDWR);
 	char c[100];
 	long num;
-	ioctl(fd,SCULL_IOCGETDATA,&c);
+	ioctl(fd,SCULL_IOC_GET_DATA,&c);
 	printf("%s\n",c);
-	ioctl(fd,SCULL_IOCDELETEPIPE);
+	ioctl(fd,SCULL_IOC_DELETE_PIPE);
 	close(fd);
 }

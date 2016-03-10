@@ -11,7 +11,7 @@ main()
 	fd=open("/dev/test0",O_RDWR);
 	char c[100];	
 	scanf("%s",c);
-	ioctl(fd,SCULL_IOCCREATPIPE);
-	ioctl(fd,SCULL_IOCSETDATA,&c);
+	ioctl(fd,SCULL_IOC_CREAT_PIPE);
+	ioctl(fd,SCULL_IOC_SET_DATA,&c);
 	close(fd);
 }

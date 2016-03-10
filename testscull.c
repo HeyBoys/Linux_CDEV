@@ -143,17 +143,17 @@ long testscull_unlocked_ioctl(struct file *filp,unsigned int cmd,unsigned long a
 	 switch(cmd)
 		{
 
-			case SCULL_IOCGETDATA:
+			case SCULL_IOC_GET_DATA: 
 				retval=copy_to_user((char __user *)arg,pipe,sizeof(char)*100);
 				*pipe='\0';
 				break;
-			case SCULL_IOCSETDATA:
+			case SCULL_IOC_SET_DATA:
 				retval=copy_from_user(pipe,(char __user *)arg,sizeof(char)*100);
 				break;
-			case SCULL_IOCCREATPIPE:	
+			case SCULL_IOC_CREAT_PIPE:	
 	 			if(pipe==0) pipe=kmalloc(sizeof(char)*100,GFP_KERNEL);
 				break;
-			case SCULL_IOCDELETEPIPE:	
+			case SCULL_IOC_DELETE_PIPE:	
 				if(pipe!=0)kfree(pipe);
 				break;
 			default:
