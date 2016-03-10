@@ -19,14 +19,14 @@ long  testscull_unlocked_ioctl(struct file *,unsigned int,unsigned long);
 
 int dev_major=50;
 int dev_minor=0;
-char *pipe;
 
 struct class *my_class;
 
 struct testscull_dev
 {
 	struct cdev  cdev;
-	int testdata; 
+	int testdata;
+   	char *pipe;	
 };
 
 struct file_operations testscull_fops={
@@ -69,7 +69,7 @@ static int   testscull_init(void)
 	}
 	my_dev=kmalloc(sizeof(struct testscull_dev),GFP_KERNEL);
 	my_class=class_create(THIS_MODULE,"test");
-	pipe=0;
+	
 	if(IS_ERR(my_class))
 	{
 		printk("create class Error\n");
@@ -84,6 +84,7 @@ static int   testscull_init(void)
 	else 
 	 {
 		 my_dev->testdata=0;
+		 my_dev->pipe =0;
 	  	 cdev_init(&my_dev->cdev,&testscull_fops);
 	  	 my_dev->cdev.owner=THIS_MODULE;
 	  	 my_dev->cdev.ops=&testscull_fops;
@@ -132,6 +133,7 @@ long testscull_unlocked_ioctl(struct file *filp,unsigned int cmd,unsigned long a
 {
    	 int err=0;
 	 long retval=0;
+	 struct testscull_dev *dev;
 	 if(_IOC_TYPE(cmd)!=SCULL_IOC_MAGIC) return -ENOTTY;
 	 if(_IOC_NR(cmd)>SCULL_IOC_MAXNR) return -ENOTTY;
 
@@ -140,21 +142,22 @@ long testscull_unlocked_ioctl(struct file *filp,unsigned int cmd,unsigned long a
 	 else 	if(_IOC_DIR(cmd) & _IOC_WRITE) 
          		err=!access_ok(VERIFY_READ,(void __user *)arg, _IOC_SIZE(cmd));
 	 if(err)  return -EFAULT;
+	 dev = filp->private_data;
 	 switch(cmd)
 		{
 
 			case SCULL_IOC_GET_DATA: 
-				retval=copy_to_user((char __user *)arg,pipe,sizeof(char)*100);
-				*pipe='\0';
+				retval=copy_to_user((char __user *)arg,dev->pipe,sizeof(char)*100);
+				*(dev->pipe)='\0';
 				break;
 			case SCULL_IOC_SET_DATA:
-				retval=copy_from_user(pipe,(char __user *)arg,sizeof(char)*100);
+				retval=copy_from_user(dev->pipe,(char __user *)arg,sizeof(char)*100);
 				break;
 			case SCULL_IOC_CREAT_PIPE:	
-	 			if(pipe==0) pipe=kmalloc(sizeof(char)*100,GFP_KERNEL);
+	 			if(dev->pipe==0) dev->pipe=kmalloc(sizeof(char)*100,GFP_KERNEL);
 				break;
 			case SCULL_IOC_DELETE_PIPE:	
-				if(pipe!=0)kfree(pipe);
+				if(dev->pipe!=0)kfree(dev->pipe);
 				break;
 			default:
 				return -ENOTTY;
